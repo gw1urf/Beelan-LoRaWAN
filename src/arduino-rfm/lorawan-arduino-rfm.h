@@ -59,7 +59,7 @@ public:
     LoRaWANClass();
     ~LoRaWANClass();
 
-    bool init(void);
+    bool init(int rngSeed);
     bool join(void);
     void sleep(void);
     void wakeUp(void);

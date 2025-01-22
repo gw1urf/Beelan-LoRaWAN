@@ -42,12 +42,20 @@ LoRaWANClass::~LoRaWANClass()
 {
 }
 
-bool LoRaWANClass::init(void)
+bool LoRaWANClass::init(int rngSeed)
 {
     // Lora Setting Class
     dev_class = CLASS_A;
+
     // Random seed
-    randomSeed(analogRead(0));
+    // The previous version used an unconditional analogRead(0) which
+    // assumes that pin 0 is analog capable (not true on some architectures).
+    // Forcing the user to provide a seed gives them flexibility to do something
+    // more appropriate. Even using a simple counter in eeprom that's 
+    // incremented on boot is probably good enough. Note that we no longer
+    // use a random number to generate DevNonce - randomisation is only
+    // used for choosing channel numbers.
+    randomSeed(rngSeed);
 
     // Status
     RFM_Command_Status = NO_RFM_COMMAND;
