@@ -647,20 +647,19 @@ void LORA_Receive_Data(sBuffer *Data_Rx, sLoRa_Session *Session_Data, sLoRa_OTAA
 }
 /*
 *****************************************************************************************
-* Description : Function that is used to generate device nonce used in the join request function
-*				This is based on a pseudo random function in the arduino library
+* Description : Function that is used to generate device nonce used in the join request function.
+*               This is now based on a counter - it just increments the contents of DevNonce. 
+*               You should persist after a successful join and restore it before a new join.
 *
 * Arguments   : *Devnonce pointer to the devnonce arry of withc is unsigned char[2]
 *****************************************************************************************
 */
 static void Generate_DevNonce(unsigned char *DevNonce)
 {
-	unsigned int RandNumber;
-
-	RandNumber = random(0xFFFF);
-
-	DevNonce[0] = RandNumber & 0x00FF;
-	DevNonce[1] = (RandNumber >> 8) & 0x00FF;
+    if (++DevNonce[0] == 0)
+    {
+        ++DevNonce[1];
+    }
 }
 /*
 *****************************************************************************************
