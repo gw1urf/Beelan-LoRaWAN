@@ -342,7 +342,9 @@ void LORA_Send_Data(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *Lo
 
 void LORA_Send_ACK(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *LoRa_Settings)
 {
-	Serial.println("LoraMac send ack");
+    #ifdef LORAWAN_DEBUG_STREAM
+	LORAWAN_DEBUG_STREAM.println("LoraMac send ack");
+    #endif
 	//Define variables
 	unsigned char i;
 
@@ -537,6 +539,12 @@ void LORA_Receive_Data(sBuffer *Data_Rx, sLoRa_Session *Session_Data, sLoRa_OTAA
 			 //Get frame counter
 			Message->Frame_Counter = RFM_Data[7];
 			Message->Frame_Counter = (Message->Frame_Counter << 8) + RFM_Data[6];
+
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.print("RX Frame counter = ");
+            LORAWAN_DEBUG_STREAM.print(Message->Frame_Counter);
+            LORAWAN_DEBUG_STREAM.println();
+            #endif
 
 			//Lower Package length with 4 to remove MIC length
 			RFM_Package.Counter -= 4;
@@ -837,14 +845,14 @@ bool LORA_join_Accept(sBuffer *Data_Rx,sLoRa_Session *Session_Data, sLoRa_OTAA *
 				//Clear Data counter
 				Data_Rx->Counter = 0x00;
 
-#ifdef DEBUG
-				Serial.print(F("NwkSKey: "));
+#ifdef LORAWAN_DEBUG_STREAM
+				LORAWAN_DEBUG_STREAM.print(F("NwkSKey: "));
 				for(byte i = 0; i < 16 ;++i)
-					Serial.print(Session_Data->NwkSKey[i],HEX);
-				Serial.print(F("\nAppSKey: "));
+					LORAWAN_DEBUG_STREAM.print(Session_Data->NwkSKey[i],HEX);
+				LORAWAN_DEBUG_STREAM.print(F("\nAppSKey: "));
 				for(byte i = 0; i < 16 ;++i)
-					Serial.print(Session_Data->AppSKey[i],HEX);
-				Serial.println();
+					LORAWAN_DEBUG_STREAM.print(Session_Data->AppSKey[i],HEX);
+				LORAWAN_DEBUG_STREAM.println();
 #endif	
 				joinStatus = true;
 			}

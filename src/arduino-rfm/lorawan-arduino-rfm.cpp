@@ -343,7 +343,9 @@ void LoRaWANClass::sendUplink(char *data, unsigned int len, unsigned char confir
 void LoRaWANClass::sendACK()
 {
     char Str[10];
-    Serial.println("sendACK triggered!!");
+    #ifdef LORAWAN_DEBUG_STREAM
+    LORAWAN_DEBUG_STREAM.println("sendACK triggered!!");
+    #endif
     lora.setDeviceClass(CLASS_A); // start as class a device
 
     if (currentChannel == MULTI)
@@ -508,6 +510,9 @@ void LoRaWANClass::update(void)
         LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings, &upMsg_Type);
         
         if ((Message_Rx.Frame_Control & 0x20) > 0){ // ack get only in RX1 window
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.println("Got an ACK");
+            #endif
             Ack_Status = NEW_ACK;
             Message_Rx.Frame_Control = 0; // clear ack bit after reading
         }
@@ -518,8 +523,9 @@ void LoRaWANClass::update(void)
             uint8_t fPort = Message_Rx.Frame_Port;
             if(lora.messageCallback) lora.messageCallback(&Buffer_Rx, isConfirmed, fPort);
             Rx_Status = NEW_RX;
-            Serial.println("Data received over RX1");
-            
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.println("Data received over RX1");
+            #endif
         }
 
         RFM_Command_Status = NO_RFM_COMMAND;
@@ -554,6 +560,9 @@ void LoRaWANClass::update(void)
         }
         if (isRxDone)
         {
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.println("Got an RX in class C mode");
+            #endif
             LORA_Receive_Data(&Buffer_Rx, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings);
             if (Buffer_Rx.Counter != 0x00)
             {
@@ -562,7 +571,9 @@ void LoRaWANClass::update(void)
             uint8_t fPort = Message_Rx.Frame_Port;
             if(lora.messageCallback) lora.messageCallback(&Buffer_Rx, isConfirmed, fPort);
             Buffer_Rx.Counter = 0x00; // clear counter for the next cycle
-            Serial.println("Data received over RX2");
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.println("Data received over RX2");
+            #endif 
             
             }
         }
