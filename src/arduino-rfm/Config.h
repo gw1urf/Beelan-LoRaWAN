@@ -10,12 +10,6 @@
 #error "Select the Region in Config.h"
 #endif
 
-// If you dont define _CLASS_C_, CLASS_A mode will be on
-//#define _CLASS_C_
-
-//Uncomment for debug
-//#define DEBUG
-
 // Define max payload size used for this node
 #define MAX_UPLINK_PAYLOAD_SIZE 220
 #define MAX_DOWNLINK_PAYLOAD_SIZE 220

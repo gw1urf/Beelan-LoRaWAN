@@ -304,6 +304,11 @@ int LoRaWANClass::getRssi()
 
 void LoRaWANClass::setDeviceClass(devclass_t dev_class)
 {
+    this->dev_class = dev_class;
+}
+
+void LoRaWANClass::setRunningDeviceClass(devclass_t dev_class)
+{
     LoRa_Settings.Mote_Class = (dev_class == CLASS_A) ? CLASS_A : CLASS_C;
 
     if (LoRa_Settings.Mote_Class == CLASS_A)
@@ -321,7 +326,7 @@ void LoRaWANClass::setDeviceClass(devclass_t dev_class)
 
 void LoRaWANClass::sendUplink(char *data, unsigned int len, unsigned char confirm, unsigned char mport)
 {
-    lora.setDeviceClass(CLASS_A); // start as class a device
+    lora.setRunningDeviceClass(CLASS_A); // start as class a device
 
     if (currentChannel == MULTI)
     {
@@ -346,7 +351,7 @@ void LoRaWANClass::sendACK()
     #ifdef LORAWAN_DEBUG_STREAM
     LORAWAN_DEBUG_STREAM.println("sendACK triggered!!");
     #endif
-    lora.setDeviceClass(CLASS_A); // start as class a device
+    lora.setRunningDeviceClass(CLASS_A); // start as class a device
 
     if (currentChannel == MULTI)
     {
@@ -486,15 +491,13 @@ bool LoRaWANClass::readAck(void)
     return false;
 }
 
-#ifdef _CLASS_C_
 void LoRaWANClass::switchToClassC(sSettings *LoRa_Settings)
 {
-    lora.setDeviceClass(CLASS_C);
+    lora.setRunningDeviceClass(CLASS_C);
  	LoRa_Settings->Channel_Rx = CHRX2;    // set Rx2 channel 868.500 MHZ 
 	LoRa_Settings->Datarate_Rx = SF12BW125;   //set RX2 datarate 12
     RFM_Continuous_Receive(LoRa_Settings);
 }
-#endif
 
 void LoRaWANClass::onMessage(void(*callback)(sBuffer *Data_Rx, bool isConfirmed, uint8_t fPort))
 {
@@ -507,7 +510,7 @@ void LoRaWANClass::update(void)
     if ((RFM_Command_Status == NEW_RFM_COMMAND || RFM_Command_Status == JOIN) && LoRa_Settings.Mote_Class == CLASS_A)
     {
         //LoRaWAN TX/RX cycle
-        LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings, &upMsg_Type);
+        LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings, &upMsg_Type, dev_class==CLASS_C);
         
         if ((Message_Rx.Frame_Control & 0x20) > 0){ // ack get only in RX1 window
             #ifdef LORAWAN_DEBUG_STREAM
@@ -540,7 +543,7 @@ void LoRaWANClass::update(void)
         if (RFM_Command_Status == NEW_RFM_COMMAND)
         {
             //LoRaWAN TX/RX cycle
-            LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings,&upMsg_Type);
+            LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings,&upMsg_Type, dev_class==CLASS_C);
             if (Buffer_Rx.Counter != 0x00)
             {
                 Rx_Status = NEW_RX;
@@ -581,15 +584,13 @@ void LoRaWANClass::update(void)
         RFM_Command_Status = NO_RFM_COMMAND;
     }
     
-        #ifdef _CLASS_C_
-        if (LoRa_Settings.Mote_Class != CLASS_C)
+        if ((dev_class == CLASS_C) && (LoRa_Settings.Mote_Class != CLASS_C))
         {
             #ifdef LORAWAN_DEBUG_STREAM
             LORAWAN_DEBUG_STREAM.println("Switch to C called");
             #endif
             lora.switchToClassC(&LoRa_Settings);
         }
-        #endif
 
 }
 

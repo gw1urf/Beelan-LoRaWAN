@@ -110,6 +110,7 @@ public:
 
 private:
     void randomChannel();
+    void setRunningDeviceClass(devclass_t dev_class);
 
 private:
     // Messages

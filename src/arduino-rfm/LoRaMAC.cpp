@@ -63,7 +63,8 @@
 *****************************************************************************************
 */
 void LORA_Cycle(sBuffer *Data_Tx, sBuffer *Data_Rx, RFM_command_t *RFM_Command, sLoRa_Session *Session_Data,
- 									sLoRa_OTAA *OTAA_Data, sLoRa_Message *Message_Rx, sSettings *LoRa_Settings, msg_t *upMsg_Type)
+ 									sLoRa_OTAA *OTAA_Data, sLoRa_Message *Message_Rx, sSettings *LoRa_Settings, 
+                                    msg_t *upMsg_Type, bool Device_Is_Class_C)
 {
     static const unsigned int Receive_Delay_1 = LoRa_Settings->Rx1_Delay;
     static const unsigned int Receive_Delay_2 = LoRa_Settings->Rx2_Delay;
@@ -143,10 +144,9 @@ void LORA_Cycle(sBuffer *Data_Tx, sBuffer *Data_Rx, RFM_command_t *RFM_Command, 
 			return;			
 		}
 
-		// 
-		#ifdef _CLASS_C_
-		return;
-		#endif
+        if (Device_Is_Class_C){
+            return;
+        }
 
 		// Class C open RX2 immediately after first rx window
 		if(LoRa_Settings->Mote_Class == CLASS_C){
