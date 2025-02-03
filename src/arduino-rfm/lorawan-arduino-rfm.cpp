@@ -582,7 +582,13 @@ void LoRaWANClass::update(void)
     }
     
         #ifdef _CLASS_C_
-        lora.switchToClassC(&LoRa_Settings);
+        if (LoRa_Settings.Mote_Class != CLASS_C)
+        {
+            #ifdef LORAWAN_DEBUG_STREAM
+            LORAWAN_DEBUG_STREAM.println("Switch to C called");
+            #endif
+            lora.switchToClassC(&LoRa_Settings);
+        }
         #endif
 
 }
