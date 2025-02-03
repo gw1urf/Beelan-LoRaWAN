@@ -37,6 +37,10 @@
 
 #include "Struct.h"
 
+#ifndef RX2_DATARATE
+#define RX2_DATARATE SF12BW125
+#endif
+
 /*
 *****************************************************************************************
 * TYPE DEFINITIONS

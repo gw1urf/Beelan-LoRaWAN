@@ -782,7 +782,7 @@ void RFM_Continuous_Receive(sSettings *LoRa_Settings)
 	//Change Datarate and channel.
   // This depends on regional parameters
 #if defined(EU_868)
-  RFM_Change_Datarate(SF12BW125);
+  RFM_Change_Datarate(RX2_DATARATE);
   RFM_Change_Channel(CHRX2);
 #elif defined(IN_865)
   RFM_Change_Datarate(SF10BW125);
