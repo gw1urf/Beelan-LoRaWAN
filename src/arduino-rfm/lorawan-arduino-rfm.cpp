@@ -74,7 +74,9 @@ bool LoRaWANClass::init(int rngSeed)
     Session_Data.NwkSKey = NwkSKey;
     Session_Data.AppSKey = AppSKey;
     Session_Data.DevAddr = Address_Tx;
-    Session_Data.Frame_Counter = &Frame_Counter_Tx;
+    Session_Data.Frame_Counter_Tx = &Frame_Counter_Tx;
+    Session_Data.Frame_Counter_Rx = &Frame_Counter_Rx;
+    Session_Data.Device_Class = &dev_class;
 
     //Initialize OTAA data struct
     memset(DevEUI, 0x00, 8);
@@ -510,7 +512,7 @@ void LoRaWANClass::update(void)
     if ((RFM_Command_Status == NEW_RFM_COMMAND || RFM_Command_Status == JOIN) && LoRa_Settings.Mote_Class == CLASS_A)
     {
         //LoRaWAN TX/RX cycle
-        LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings, &upMsg_Type, dev_class==CLASS_C);
+        LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings, &upMsg_Type);
         
         if ((Message_Rx.Frame_Control & 0x20) > 0){ // ack get only in RX1 window
             #ifdef LORAWAN_DEBUG_STREAM
@@ -543,7 +545,7 @@ void LoRaWANClass::update(void)
         if (RFM_Command_Status == NEW_RFM_COMMAND)
         {
             //LoRaWAN TX/RX cycle
-            LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings,&upMsg_Type, dev_class==CLASS_C);
+            LORA_Cycle(&Buffer_Tx, &Buffer_Rx, &RFM_Command_Status, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings,&upMsg_Type);
             if (Buffer_Rx.Counter != 0x00)
             {
                 Rx_Status = NEW_RX;
@@ -616,14 +618,24 @@ void LoRaWANClass::randomChannel()
     LoRa_Settings.Channel_Tx = freq_idx;
 }
 
-unsigned int LoRaWANClass::getFrameCounter()
+unsigned int LoRaWANClass::getFrameCounterTx()
 {
     return Frame_Counter_Tx;
 }
 
-void LoRaWANClass::setFrameCounter(unsigned int FrameCounter)
+void LoRaWANClass::setFrameCounterTx(unsigned int FrameCounter)
 {
     Frame_Counter_Tx = FrameCounter;
+}
+
+unsigned int LoRaWANClass::getFrameCounterRx()
+{
+    return Frame_Counter_Rx;
+}
+
+void LoRaWANClass::setFrameCounterRx(unsigned int FrameCounter)
+{
+    Frame_Counter_Rx = FrameCounter;
 }
 
 

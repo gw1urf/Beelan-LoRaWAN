@@ -64,7 +64,7 @@
 */
 void LORA_Cycle(sBuffer *Data_Tx, sBuffer *Data_Rx, RFM_command_t *RFM_Command, sLoRa_Session *Session_Data,
  									sLoRa_OTAA *OTAA_Data, sLoRa_Message *Message_Rx, sSettings *LoRa_Settings, 
-                                    msg_t *upMsg_Type, bool Device_Is_Class_C)
+                                    msg_t *upMsg_Type)
 {
     static const unsigned int Receive_Delay_1 = LoRa_Settings->Rx1_Delay;
     static const unsigned int Receive_Delay_2 = LoRa_Settings->Rx2_Delay;
@@ -144,7 +144,7 @@ void LORA_Cycle(sBuffer *Data_Tx, sBuffer *Data_Rx, RFM_command_t *RFM_Command, 
 			return;			
 		}
 
-        if (Device_Is_Class_C){
+        if (*Session_Data->Device_Class == CLASS_C){
             return;
         }
 
@@ -244,7 +244,7 @@ void LORA_Send_Data(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *Lo
 	Message.Direction = 0x00;
 
 	//Load the frame counter from the session data into the message
-	Message.Frame_Counter = *Session_Data->Frame_Counter;
+	Message.Frame_Counter = *Session_Data->Frame_Counter_Tx;
 
 	//Set confirmation
 	//Unconfirmed
@@ -272,8 +272,8 @@ void LORA_Send_Data(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *Lo
 	RFM_Package.Data[5] = Message.Frame_Control;
 
 	//Load frame counter
-	RFM_Package.Data[6] = (*Session_Data->Frame_Counter & 0x00FF);
-	RFM_Package.Data[7] = ((*Session_Data->Frame_Counter >> 8) & 0x00FF);
+	RFM_Package.Data[6] = (*Session_Data->Frame_Counter_Tx & 0x00FF);
+	RFM_Package.Data[7] = ((*Session_Data->Frame_Counter_Tx >> 8) & 0x00FF);
 
 	//Set data counter to 8
 	RFM_Package.Counter = 8;
@@ -314,14 +314,14 @@ void LORA_Send_Data(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *Lo
 	RFM_Send_Package(&RFM_Package, LoRa_Settings);
 
 	//Raise Frame counter
-	if(*Session_Data->Frame_Counter != 0xFFFF)
+	if(*Session_Data->Frame_Counter_Tx != 0xFFFF)
 	{
 	//Raise frame counter
-	*Session_Data->Frame_Counter = *Session_Data->Frame_Counter + 1;
+	*Session_Data->Frame_Counter_Tx = *Session_Data->Frame_Counter_Tx + 1;
 	}
 	else
 	{
-	*Session_Data->Frame_Counter = 0x0000;
+	*Session_Data->Frame_Counter_Tx = 0x0000;
 	}
 
 	//Change channel for next message if hopping is activated
@@ -369,7 +369,7 @@ void LORA_Send_ACK(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *LoR
 	Message.Direction = 0x00;
 
 	//Load the frame counter from the session data into the message
-	Message.Frame_Counter = *Session_Data->Frame_Counter;
+	Message.Frame_Counter = *Session_Data->Frame_Counter_Tx;
 
 	//Set confirmation
 	//Unconfirmed
@@ -398,8 +398,8 @@ void LORA_Send_ACK(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *LoR
 	RFM_Package.Data[5] = (Message.Frame_Control | 0x20);
 
 	//Load frame counter
-	RFM_Package.Data[6] = (*Session_Data->Frame_Counter & 0x00FF);
-	RFM_Package.Data[7] = ((*Session_Data->Frame_Counter >> 8) & 0x00FF);
+	RFM_Package.Data[6] = (*Session_Data->Frame_Counter_Tx & 0x00FF);
+	RFM_Package.Data[7] = ((*Session_Data->Frame_Counter_Tx >> 8) & 0x00FF);
 
 	//Set data counter to 8
 	RFM_Package.Counter = 8;
@@ -440,14 +440,14 @@ void LORA_Send_ACK(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *LoR
 	RFM_Send_Package(&RFM_Package, LoRa_Settings);
 
 	//Raise Frame counter
-	if(*Session_Data->Frame_Counter != 0xFFFF)
+	if(*Session_Data->Frame_Counter_Tx != 0xFFFF)
 	{
 	//Raise frame counter
-	*Session_Data->Frame_Counter = *Session_Data->Frame_Counter + 1;
+	*Session_Data->Frame_Counter_Tx = *Session_Data->Frame_Counter_Tx + 1;
 	}
 	else
 	{
-	*Session_Data->Frame_Counter = 0x0000;
+	*Session_Data->Frame_Counter_Tx = 0x0000;
 	}
 
 	//Change channel for next message if hopping is activated
@@ -540,12 +540,6 @@ void LORA_Receive_Data(sBuffer *Data_Rx, sLoRa_Session *Session_Data, sLoRa_OTAA
 			Message->Frame_Counter = RFM_Data[7];
 			Message->Frame_Counter = (Message->Frame_Counter << 8) + RFM_Data[6];
 
-            #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.print("RX Frame counter = ");
-            LORAWAN_DEBUG_STREAM.print(Message->Frame_Counter);
-            LORAWAN_DEBUG_STREAM.println();
-            #endif
-
 			//Lower Package length with 4 to remove MIC length
 			RFM_Package.Counter -= 4;
 
@@ -595,7 +589,23 @@ void LORA_Receive_Data(sBuffer *Data_Rx, sLoRa_Session *Session_Data, sLoRa_OTAA
 				Message_Status = WRONG_MESSAGE;
 		  	}
 
-			//if the address is OK then decrypt the data
+            // Frame counters must increase, to avoid replay attacks.
+            if (Message_Status == ADDRESS_OK)
+            {
+                // FIXME - what happens on wrap?
+                if (Message->Frame_Counter > *Session_Data->Frame_Counter_Rx) {
+                    *Session_Data->Frame_Counter_Rx = Message->Frame_Counter;
+                } else {
+                    Message_Status = WRONG_MESSAGE;
+                    #ifdef LORAWAN_DEBUG_STREAM
+                    LORAWAN_DEBUG_STREAM.print("Invalid RX frame counter - received ");
+                    LORAWAN_DEBUG_STREAM.print(Message->Frame_Counter);
+                    LORAWAN_DEBUG_STREAM.print(", expected > ");
+                    LORAWAN_DEBUG_STREAM.println(*Session_Data->Frame_Counter_Rx);
+                    #endif
+                }
+            }
+
 			//Send the data to USB
 			if(Message_Status == ADDRESS_OK)
 			{
@@ -839,8 +849,9 @@ bool LORA_join_Accept(sBuffer *Data_Rx,sLoRa_Session *Session_Data, sLoRa_OTAA *
 				AES_Encrypt(Session_Data->NwkSKey,OTAA_Data->AppKey);
 				AES_Encrypt(Session_Data->AppSKey,OTAA_Data->AppKey);
 
-				//Reset Frame counter
-				*Session_Data->Frame_Counter = 0x0000;
+				//Reset Frame counters
+				*Session_Data->Frame_Counter_Tx = 0x0000;
+				*Session_Data->Frame_Counter_Rx = 0x0000;
 
 				//Clear Data counter
 				Data_Rx->Counter = 0x00;

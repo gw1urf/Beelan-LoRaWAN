@@ -91,9 +91,11 @@ public:
     void switchToClassC(sSettings *LoRa_Settings);
     void onMessage(void(*callback)(sBuffer *Data_Rx, bool isConfirmed, uint8_t fPort));
 
-    // frame counter
-    unsigned int getFrameCounter();
-    void setFrameCounter(unsigned int FrameCounter);
+    // frame counters
+    unsigned int getFrameCounterTx();
+    void setFrameCounterTx(unsigned int FrameCounter);
+    unsigned int getFrameCounterRx();
+    void setFrameCounterRx(unsigned int FrameCounter);
 
     // Declare public instead of private so they can be save on RTC ram in the main script before deep sleep for ESP
     unsigned char DevEUI[8];
@@ -106,6 +108,7 @@ public:
     unsigned char NwkSKey[16];
     unsigned char AppSKey[16];
     unsigned int Frame_Counter_Tx;
+    unsigned int Frame_Counter_Rx;
     sSettings LoRa_Settings;
 
 private:

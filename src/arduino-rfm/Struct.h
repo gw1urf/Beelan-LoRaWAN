@@ -48,6 +48,14 @@ struct sRFM_pins{
 // common def
 extern const sRFM_pins RFM_pins;
 
+typedef enum {CLASS_A, CLASS_C} devclass_t;
+
+typedef enum {NO_RX, NEW_RX} rx_t;
+
+typedef enum {NO_ACK, NEW_ACK} ack_t;
+
+typedef enum {MSG_UP, MSG_ACK} msg_t;
+
 //Struct used for Buffers
 typedef struct {
     unsigned char *Data;
@@ -59,7 +67,9 @@ typedef struct {
     unsigned char *NwkSKey;
     unsigned char *AppSKey;
     unsigned char *DevAddr;
-    unsigned int  *Frame_Counter;
+    unsigned int  *Frame_Counter_Tx;
+    unsigned int  *Frame_Counter_Rx;
+    devclass_t *Device_Class;
 } sLoRa_Session;
 
 typedef struct {
@@ -175,14 +185,6 @@ typedef enum {
     SF7BW125    = 0x05
 #endif
 } dataRates_t;
-
-typedef enum {CLASS_A, CLASS_C} devclass_t;
-
-typedef enum {NO_RX, NEW_RX} rx_t;
-
-typedef enum {NO_ACK, NEW_ACK} ack_t;
-
-typedef enum {MSG_UP, MSG_ACK} msg_t;
 
 #endif
 
