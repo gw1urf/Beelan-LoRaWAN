@@ -309,7 +309,7 @@ static unsigned char RFM_Read(unsigned char RFM_Address)
   //End the transaction so that other hardware can use the bus
   SPI.endTransaction();
 
-  #ifdef LORAWAN_DEBUG_STREAM
+  #if defined(LORAWAN_DEBUG_STREAM) && defined(RFM95_SPI_DEBUG)
   LORAWAN_DEBUG_STREAM.print("SPI Read ADDR: ");
   LORAWAN_DEBUG_STREAM.print(RFM_Address, HEX);
   LORAWAN_DEBUG_STREAM.print(" DATA: ");
@@ -862,7 +862,7 @@ message_t RFM_Get_Package(sBuffer *RFM_Rx_Package)
 void RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
 {
   // br: SPI Transfer Debug
-  #ifdef LORAWAN_DEBUG_STREAM
+  #if defined(LORAWAN_DEBUG_STREAM) && defined(RFM95_SPI_DEBUG)
     LORAWAN_DEBUG_STREAM.print("SPI Write ADDR: ");
     LORAWAN_DEBUG_STREAM.print(RFM_Address, HEX);
     LORAWAN_DEBUG_STREAM.print(" DATA: ");
