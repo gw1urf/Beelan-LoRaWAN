@@ -343,7 +343,7 @@ void LORA_Send_Data(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *Lo
 void LORA_Send_ACK(sBuffer *Data_Tx, sLoRa_Session *Session_Data, sSettings *LoRa_Settings)
 {
     #ifdef LORAWAN_DEBUG_STREAM
-	LORAWAN_DEBUG_STREAM.println("LoraMac send ack");
+	LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: LoraMac send ack"));
     #endif
 	//Define variables
 	unsigned char i;
@@ -598,9 +598,9 @@ void LORA_Receive_Data(sBuffer *Data_Rx, sLoRa_Session *Session_Data, sLoRa_OTAA
                 } else {
                     Message_Status = WRONG_MESSAGE;
                     #ifdef LORAWAN_DEBUG_STREAM
-                    LORAWAN_DEBUG_STREAM.print("Invalid RX frame counter - received ");
+                    LORAWAN_DEBUG_STREAM.print(F("LoRaWAN: Invalid RX frame counter - received "));
                     LORAWAN_DEBUG_STREAM.print(Message->Frame_Counter);
-                    LORAWAN_DEBUG_STREAM.print(", expected > ");
+                    LORAWAN_DEBUG_STREAM.print(F(", expected > "));
                     LORAWAN_DEBUG_STREAM.println(*Session_Data->Frame_Counter_Rx);
                     #endif
                 }
@@ -857,10 +857,10 @@ bool LORA_join_Accept(sBuffer *Data_Rx,sLoRa_Session *Session_Data, sLoRa_OTAA *
 				Data_Rx->Counter = 0x00;
 
 #ifdef LORAWAN_DEBUG_STREAM
-				LORAWAN_DEBUG_STREAM.print(F("NwkSKey: "));
+				LORAWAN_DEBUG_STREAM.print(F("LoRaWAN: NwkSKey: "));
 				for(byte i = 0; i < 16 ;++i)
 					LORAWAN_DEBUG_STREAM.print(Session_Data->NwkSKey[i],HEX);
-				LORAWAN_DEBUG_STREAM.print(F("\nAppSKey: "));
+				LORAWAN_DEBUG_STREAM.print(F("\r\nAppSKey: "));
 				for(byte i = 0; i < 16 ;++i)
 					LORAWAN_DEBUG_STREAM.print(Session_Data->AppSKey[i],HEX);
 				LORAWAN_DEBUG_STREAM.println();

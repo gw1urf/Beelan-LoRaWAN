@@ -351,7 +351,7 @@ void LoRaWANClass::sendACK()
 {
     char Str[10];
     #ifdef LORAWAN_DEBUG_STREAM
-    LORAWAN_DEBUG_STREAM.println("sendACK triggered!!");
+    LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: sendACK triggered!!"));
     #endif
     lora.setRunningDeviceClass(CLASS_A); // start as class a device
 
@@ -516,7 +516,7 @@ void LoRaWANClass::update(void)
         
         if ((Message_Rx.Frame_Control & 0x20) > 0){ // ack get only in RX1 window
             #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.println("Got an ACK");
+            LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Got an ACK"));
             #endif
             Ack_Status = NEW_ACK;
             Message_Rx.Frame_Control = 0; // clear ack bit after reading
@@ -529,7 +529,7 @@ void LoRaWANClass::update(void)
             if(lora.messageCallback) lora.messageCallback(&Buffer_Rx, isConfirmed, fPort);
             Rx_Status = NEW_RX;
             #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.println("Data received over RX1");
+            LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Data received over RX1"));
             #endif
         }
 
@@ -566,7 +566,7 @@ void LoRaWANClass::update(void)
         if (isRxDone)
         {
             #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.println("Got an RX in class C mode");
+            LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Got an RX in class C mode"));
             #endif
             LORA_Receive_Data(&Buffer_Rx, &Session_Data, &OTAA_Data, &Message_Rx, &LoRa_Settings);
             if (Buffer_Rx.Counter != 0x00)
@@ -577,7 +577,7 @@ void LoRaWANClass::update(void)
             if(lora.messageCallback) lora.messageCallback(&Buffer_Rx, isConfirmed, fPort);
             Buffer_Rx.Counter = 0x00; // clear counter for the next cycle
             #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.println("Data received over RX2");
+            LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Data received over RX2"));
             #endif 
             
             }
@@ -589,7 +589,7 @@ void LoRaWANClass::update(void)
         if ((dev_class == CLASS_C) && (LoRa_Settings.Mote_Class != CLASS_C))
         {
             #ifdef LORAWAN_DEBUG_STREAM
-            LORAWAN_DEBUG_STREAM.println("Switch to C called");
+            LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Switch to class C called"));
             #endif
             lora.switchToClassC(&LoRa_Settings);
         }

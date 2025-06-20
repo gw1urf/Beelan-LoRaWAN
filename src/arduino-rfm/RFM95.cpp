@@ -310,9 +310,9 @@ static unsigned char RFM_Read(unsigned char RFM_Address)
   SPI.endTransaction();
 
   #if defined(LORAWAN_DEBUG_STREAM) && defined(RFM95_SPI_DEBUG)
-  LORAWAN_DEBUG_STREAM.print("SPI Read ADDR: ");
+  LORAWAN_DEBUG_STREAM.print(F("LoRaWAN: SPI Read ADDR: "));
   LORAWAN_DEBUG_STREAM.print(RFM_Address, HEX);
-  LORAWAN_DEBUG_STREAM.print(" DATA: ");
+  LORAWAN_DEBUG_STREAM.print(F(" DATA: "));
   LORAWAN_DEBUG_STREAM.println(RFM_Data, HEX);
   #endif
 
@@ -791,8 +791,8 @@ void RFM_Continuous_Receive(sSettings *LoRa_Settings)
   //Datarate for downlink should be 8 but testing on 10
   //LoRa_Settings->Datarate_Rx=10;
   //LoRa_Settings->Channel_Rx=0;
-  //LORAWAN_DEBUG_STREAM.println("DataRate Rx "+String(LoRa_Settings->Datarate_Rx));
-  //LORAWAN_DEBUG_STREAM.println("Cannel Rx "+String(LoRa_Settings->Channel_Rx));
+  //LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: DataRate Rx "+String(LoRa_Settings->Datarate_Rx)));
+  //LORAWAN_DEBUG_STREAM.println(F("LoRaWAN: Channel Rx "+String(LoRa_Settings->Channel_Rx)));
   
 	RFM_Change_Datarate(LoRa_Settings->Datarate_Rx);
 	RFM_Change_Channel(LoRa_Settings->Channel_Rx);
@@ -863,9 +863,9 @@ void RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
 {
   // br: SPI Transfer Debug
   #if defined(LORAWAN_DEBUG_STREAM) && defined(RFM95_SPI_DEBUG)
-    LORAWAN_DEBUG_STREAM.print("SPI Write ADDR: ");
+    LORAWAN_DEBUG_STREAM.print(F("LoRaWAN: SPI Write ADDR: "));
     LORAWAN_DEBUG_STREAM.print(RFM_Address, HEX);
-    LORAWAN_DEBUG_STREAM.print(" DATA: ");
+    LORAWAN_DEBUG_STREAM.print(F(" DATA: "));
     LORAWAN_DEBUG_STREAM.println(RFM_Data, HEX);
   #endif
 
